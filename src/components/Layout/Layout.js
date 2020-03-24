@@ -1,4 +1,4 @@
-import React, { Component } from './node_modules/react';
+import React, { Component } from 'react';
 import Aux from '../../hoc/Auxiliary/Aux';
 import cssClasses from './Layout.module.css';
 import Toolbar from '../Navigation/Toolbar/Toolbar';
@@ -13,8 +13,13 @@ class Layout extends Component {
     render(){
         return(
             <Aux>
-                <Toolbar openSideDrawer={this.sideDrawerToggleHandler}/>
-                <SideDrawer open={this.state.showSideDrawer} close={this.sideDrawerToggleHandler}/>
+                <Toolbar
+                    openSideDrawer={this.sideDrawerToggleHandler} 
+                />
+                <SideDrawer 
+                    open={this.state.showSideDrawer} 
+                    close={this.sideDrawerToggleHandler}
+                />
                 <main className={cssClasses.Content}>
                     {this.props.children}
                 </main>

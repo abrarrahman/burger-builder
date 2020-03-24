@@ -1,0 +1,24 @@
+.Auth{
+    margin: 20px auto;
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 2px 3px #ccc;
+    border: 1px solid #eee;
+    padding: 10px;
+    box-sizing: border-box;
+}
+.Error{
+    color: red;
+}
+input{
+    display: block;
+    margin: 0 auto;
+    width: 80%;
+    height: 30px;
+    text-align: center;
+}
+@media(min-width: 500px){
+    .Auth{
+        width: 500px;
+    }
+}

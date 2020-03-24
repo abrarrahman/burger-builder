@@ -1,10 +1,13 @@
 import React, {Component} from 'react';
 import { connect } from 'react-redux'
+import * as actionCreators from '../../store/actions/index'
 import Button from '../../components/UI/Button/Button';
 import Spinner from '../../components/UI/Spinner/Spinner';
 import Input from '../../components/UI/Input/Input'
-import axios from '../../axios-orders';
 import cssClasses from './ContactData.module.css';
+import withErrorHandler from '../../hoc/withErrorHandler/withErrorHandler';
+import axios from '../../axios-orders';
+import {checkValidation} from '../../shared/utility'
 
 class ContactData extends Component {
     state={
@@ -83,12 +86,11 @@ class ContactData extends Component {
                         {value: 'cheapest', displayValue: 'Cheapest'}
                     ]
                 },
-                value: '',
+                value: 'fastest',
                 valid: true
             }
         },
-        formIsValid: false,
-        loading: false,
+        formIsValid: false
 
     }
     orderHandler = (event) => {
@@ -97,40 +99,21 @@ class ContactData extends Component {
         for(let formItem in this.state.orderForm){
             formData[formItem] = this.state.orderForm[formItem].value;
         }
-        this.setState({loading: true});
+
         const order = {
             ingredients: this.props.ingredients,
             price: this.props.price,
-            formData: formData
+            formData: formData,
+            userId: this.props.userId
         };
-        axios.post('/orders.json',order)
-            .then(response=> {
-                this.setState({loading: false});
-                this.props.history.push('/');
-            })
-            .catch(error=>{
-                this.setState({loading: false});
-            });
-    }
-    checkValidation = (value,rules) => {
-        let isValid = true;
-        if(rules.required){
-            isValid = value.trim() !== '' && isValid;
-        }
-        if(rules.minLength && value.trim() !== ''){
-            isValid = value.trim().length >= rules.minLength && isValid;
-        }
-        if(rules.maxLength && value.trim() !== ''){
-            isValid = value.trim().length <= rules.maxLength && isValid;
-        }
-        return isValid;
+        this.props.onPlaceOrder(order,this.props.token);
     }
     inputChangedHandler = (event,formItem) => {
         const updatedForm = {...this.state.orderForm}
         const updatedItem = {...this.state.orderForm[formItem]};
         updatedItem.value = event.target.value;
         if(updatedItem.validation){
-            updatedItem.valid = this.checkValidation(updatedItem.value,updatedItem.validation)
+            updatedItem.valid = checkValidation(updatedItem.value,updatedItem.validation)
         }
         updatedItem.touched = true;
         updatedForm[formItem] = updatedItem;
@@ -159,7 +142,7 @@ class ContactData extends Component {
             ))}
             <Button type='Success' disabled={!this.state.formIsValid}>Submit</Button>
         </form>;
-        if(this.state.loading){
+        if(this.props.loading){
             form = <Spinner/>;
         }
         return(
@@ -172,8 +155,16 @@ class ContactData extends Component {
 }
 const mapStateToProps = state => {
     return {
-        ingredients: state.ingredients,
-        price: state.price
+        ingredients: state.burgerBuilder.ingredients,
+        price: state.burgerBuilder.price,
+        loading: state.order.loading,
+        token: state.auth.token,
+        userId: state.auth.userId
     }
 }
-export default connect(mapStateToProps)(ContactData);
+const mapDispatchToProps = dispatch => {
+    return {
+        onPlaceOrder: (order,token) => dispatch(actionCreators.tryPurchaseBurger(order,token))
+    }
+}
+export default connect(mapStateToProps,mapDispatchToProps)(withErrorHandler(ContactData,axios));

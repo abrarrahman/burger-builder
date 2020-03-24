@@ -1,9 +1,8 @@
 import React, {Component} from 'react';
 import { connect } from 'react-redux';
 // import queryString from 'query-string';
-import { Route } from 'react-router-dom';
+import { Route, Redirect, withRouter } from 'react-router-dom';
 import CheckoutSummary from '../../components/Checkout/CheckoutSummary/CheckoutSummary';
-import Spinner from '../../components/UI/Spinner/Spinner';
 import ContactData from '../ContactData/ContactData';
 
 class Checkout extends Component {
@@ -42,12 +41,13 @@ class Checkout extends Component {
         
         return(
             <div>
+                {this.props.purchased? <Redirect to='/'/>: null}
                 {this.props.ingredients?
                     <CheckoutSummary 
                         ingredients={this.props.ingredients} 
                         cancel={this.checkoutCancelledHandler}
                         continue={this.checkoutContinuedHandler}
-                    />:<Spinner/>}
+                    />:<Redirect to='/'/>}
                 <Route 
                     path={this.props.match.url+'/contact-data'} 
                     component={ContactData}
@@ -58,8 +58,9 @@ class Checkout extends Component {
 }
 const mapStateToProps = state => {
     return {
-        ingredients: state.ingredients,
-        price: state.price
+        ingredients: state.burgerBuilder.ingredients,
+        price: state.burgerBuilder.price,
+        purchased: state.order.purchased
     }
 }
-export default connect(mapStateToProps)(Checkout);
+export default connect(mapStateToProps)(withRouter(Checkout));
